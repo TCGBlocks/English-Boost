@@ -1,94 +1,58 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>English Boost - Flashcards</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    input, textarea, select, button { margin: 5px 0; width: 100%; padding: 8px; }
-    #meus-cards div { border: 1px solid #ccc; padding: 10px; margin: 5px 0; border-radius: 6px; background: #f9f9f9; }
-  </style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>English Boost - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen flex items-center justify-center bg-gradient-to-tr from-purple-200 via-purple-100 to-pink-100">
+    <div class="relative bg-white bg-opacity-50 backdrop-blur-xl rounded-3xl shadow-xl p-10 max-w-md w-full flex flex-col items-center">
+      <h1 class="text-3xl font-bold text-purple-700 mb-6 flex items-center gap-2">
+        <span>🚀</span> English Boost
+      </h1>
+      <img
+        src="butterfly.png"
+        alt="Borboleta colorida"
+        class="absolute -top-16 right-1/2 translate-x-1/2 w-32 drop-shadow-lg"
+      />
+      <button
+        onclick="loginWithGoogle()"
+        class="mt-24 px-6 py-3 bg-purple-700 text-white font-medium rounded-full shadow-md hover:bg-purple-800 transition"
+      >
+        Entrar com Google
+      </button>
+    </div>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+      import {
+        getAuth,
+        GoogleAuthProvider,
+        signInWithPopup
+      } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
-  <h1>English Boost - Meus Flashcards</h1>
+      const firebaseConfig = {
+        apiKey: "SUA_API_KEY",
+        authDomain: "SUA_AUTH_DOMAIN",
+        projectId: "SUA_PROJECT_ID",
+        storageBucket: "SUA_STORAGE_BUCKET",
+        messagingSenderId: "SUA_MSG_ID",
+        appId: "SUA_APP_ID"
+      };
 
-  <div>
-    <h3>Adicionar Palavra</h3>
-    <input type="text" placeholder="Palavra (em inglês)" />
-    <input type="text" placeholder="Definição em português" />
-    <select>
-      <option value="Negócios">Negócios</option>
-      <option value="Tecnologia">Tecnologia</option>
-      <option value="Jurídico">Jurídico</option>
-    </select>
-    <textarea rows="4" placeholder="Exemplos de uso"></textarea>
-    <button>Salvar</button>
-  </div>
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const provider = new GoogleAuthProvider();
 
-  <h3>📚 Meus Cards</h3>
-  <div id="meus-cards">Nenhum card</div>
-
-  <script>
-    const STORAGE_KEY = "englishBoostCards";
-
-    window.addEventListener("DOMContentLoaded", renderCards);
-
-    document.querySelector("button").addEventListener("click", () => {
-      const palavra = document.querySelector("input:nth-of-type(1)").value.trim();
-      const definicao = document.querySelector("input:nth-of-type(2)").value.trim();
-      const categoria = document.querySelector("select").value;
-      const exemplos = document.querySelector("textarea").value.trim();
-
-      if (!palavra || !definicao || !exemplos) {
-        alert("Preencha todos os campos!");
-        return;
-      }
-
-      const novoCard = { palavra, definicao, categoria, exemplos };
-      const cards = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-      cards.push(novoCard);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
-
-      alert("Palavra salva com sucesso!");
-      renderCards();
-
-      document.querySelector("input:nth-of-type(1)").value = "";
-      document.querySelector("input:nth-of-type(2)").value = "";
-      document.querySelector("textarea").value = "";
-    });
-
-    function renderCards() {
-      const container = document.querySelector("#meus-cards");
-      container.innerHTML = "";
-      const cards = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-
-      if (cards.length === 0) {
-        container.innerHTML = "<p>Nenhum card</p>";
-        return;
-      }
-
-      cards.forEach((card, index) => {
-        const div = document.createElement("div");
-        div.innerHTML = \`
-          <strong>\${card.palavra}</strong> (<em>\${card.categoria}</em>)<br/>
-          \${card.definicao}<br/>
-          <small><em>\${card.exemplos}</em></small>
-          <br/><button onclick="removeCard(\${index})">🗑 Excluir</button>
-        \`;
-        container.appendChild(div);
-      });
-    }
-
-    function removeCard(index) {
-      const cards = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-      cards.splice(index, 1);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
-      renderCards();
-    }
-  </script>
-
-</body>
+      window.loginWithGoogle = async () => {
+        try {
+          await signInWithPopup(auth, provider);
+          window.location.href = "app.html";
+        } catch (error) {
+          alert("Erro ao fazer login");
+          console.error(error);
+        }
+      };
+    </script>
+  </body>
 </html>
