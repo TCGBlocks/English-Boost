@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flashcards de Inglês</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    #cardForm {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 400px;
+      margin: auto;
+    }
+    input, textarea, button {
+      padding: 10px;
+      font-size: 16px;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin: 10px auto;
+      padding: 20px;
+      width: 300px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+    .card-back {
+      display: none;
+    }
+    .flipped .card-front {
+      display: none;
+    }
+    .flipped .card-back {
+      display: block;
+    }
+    .export-btn {
+      display: block;
+      margin: 0 auto 20px;
+      padding: 10px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Meus Flashcards de Inglês</h1>
+  <form id="cardForm">
+    <input type="text" id="word" placeholder="Palavra em inglês" required />
+    <input type="text" id="translation" placeholder="Tradução" required />
+    <textarea id="example" placeholder="Exemplo de uso"></textarea>
+    <button type="submit">Adicionar Palavra</button>
+  </form>
+  <button class="export-btn" onclick="exportToCSV()">📁 Exportar Palavras</button>
+  <div id="cardsContainer"></div>
+
+  <script>
+    const cardForm = document.getElementById('cardForm');
+    const cardsContainer = document.getElementById('cardsContainer');
+    let cards = JSON.parse(localStorage.getItem('flashcards')) || [];
+
+    function renderCards() {
+      cardsContainer.innerHTML = '';
+      cards.forEach((card, index) => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <div class="card-front">
+            <strong>${card.word}</strong>
+          </div>
+          <div class="card-back">
+            <p><em>${card.translation}</em></p>
+            <p>${card.example}</p>
+          </div>
+        `;
+        div.addEventListener('click', () => {
+          div.classList.toggle('flipped');
+        });
+        cardsContainer.appendChild(div);
+      });
+    }
+
+    cardForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const word = document.getElementById('word').value.trim();
+      const translation = document.getElementById('translation').value.trim();
+      const example = document.getElementById('example').value.trim();
+      cards.push({ word, translation, example });
+      localStorage.setItem('flashcards', JSON.stringify(cards));
+      renderCards();
+      cardForm.reset();
+    });
+
+    function exportToCSV() {
+      const csvContent = "data:text/csv;charset=utf-8," 
+        + "Palavra,Tradução,Exemplo
+"
+        + cards.map(c => `${c.word},${c.translation},"${c.example}"`).join("
+");
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "flashcards.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    renderCards();
+  </script>
+</body>
+</html>
