@@ -2,97 +2,93 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>English Boost</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>English Boost - Flashcards</title>
   <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f3f4f6;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-    .container {
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
-      text-align: center;
-      max-width: 400px;
-      width: 100%;
-    }
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 0.5rem;
-      color: #4338ca;
-    }
-    ul {
-      text-align: left;
-      margin-top: 1rem;
-    }
-    li {
-      margin-bottom: 0.5rem;
-      font-size: 0.95rem;
-    }
-    button {
-      margin-top: 1.5rem;
-      background-color: #4f46e5;
-      color: white;
-      padding: 0.8rem 1.5rem;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #4338ca;
-    }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input, textarea, select, button { margin: 5px 0; width: 100%; padding: 8px; }
+    #meus-cards div { border: 1px solid #ccc; padding: 10px; margin: 5px 0; border-radius: 6px; background: #f9f9f9; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🚀 English Boost</h1>
-    <p>Aprenda inglês de forma inteligente e divertida:</p>
-    <ul>
-      <li>✔ Cards com dificuldade (SRS leve)</li>
-      <li>✔ Categorias temáticas</li>
-      <li>✔ Estatísticas visuais</li>
-      <li>✔ Importação CSV</li>
-      <li>✔ 100% gratuito na nuvem</li>
-    </ul>
-    <button onclick="login()">Entrar com Google</button>
+
+  <h1>English Boost - Meus Flashcards</h1>
+
+  <div>
+    <h3>Adicionar Palavra</h3>
+    <input type="text" placeholder="Palavra (em inglês)" />
+    <input type="text" placeholder="Definição em português" />
+    <select>
+      <option value="Negócios">Negócios</option>
+      <option value="Tecnologia">Tecnologia</option>
+      <option value="Jurídico">Jurídico</option>
+    </select>
+    <textarea rows="4" placeholder="Exemplos de uso"></textarea>
+    <button>Salvar</button>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+  <h3>📚 Meus Cards</h3>
+  <div id="meus-cards">Nenhum card</div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyB3MJu07DvBEkeLXi-M316-Y9mIuXwU3fg",
-      authDomain: "english-boost-c6b41.firebaseapp.com",
-      projectId: "english-boost-c6b41",
-      storageBucket: "english-boost-c6b41.firebasestorage.app",
-      messagingSenderId: "985247197692",
-      appId: "1:985247197692:web:f0ccb015ee14bd12f02a79"
-    };
+  <script>
+    const STORAGE_KEY = "englishBoostCards";
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+    window.addEventListener("DOMContentLoaded", renderCards);
 
-    window.login = async () => {
-      try {
-        await signInWithPopup(auth, provider);
-        window.location.href = "app.html";
-      } catch (error) {
-        alert("Erro no login: " + error.message);
+    document.querySelector("button").addEventListener("click", () => {
+      const palavra = document.querySelector("input:nth-of-type(1)").value.trim();
+      const definicao = document.querySelector("input:nth-of-type(2)").value.trim();
+      const categoria = document.querySelector("select").value;
+      const exemplos = document.querySelector("textarea").value.trim();
+
+      if (!palavra || !definicao || !exemplos) {
+        alert("Preencha todos os campos!");
+        return;
       }
-    };
+
+      const novoCard = { palavra, definicao, categoria, exemplos };
+      const cards = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      cards.push(novoCard);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+
+      alert("Palavra salva com sucesso!");
+      renderCards();
+
+      document.querySelector("input:nth-of-type(1)").value = "";
+      document.querySelector("input:nth-of-type(2)").value = "";
+      document.querySelector("textarea").value = "";
+    });
+
+    function renderCards() {
+      const container = document.querySelector("#meus-cards");
+      container.innerHTML = "";
+      const cards = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+      if (cards.length === 0) {
+        container.innerHTML = "<p>Nenhum card</p>";
+        return;
+      }
+
+      cards.forEach((card, index) => {
+        const div = document.createElement("div");
+        div.innerHTML = \`
+          <strong>\${card.palavra}</strong> (<em>\${card.categoria}</em>)<br/>
+          \${card.definicao}<br/>
+          <small><em>\${card.exemplos}</em></small>
+          <br/><button onclick="removeCard(\${index})">🗑 Excluir</button>
+        \`;
+        container.appendChild(div);
+      });
+    }
+
+    function removeCard(index) {
+      const cards = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      cards.splice(index, 1);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+      renderCards();
+    }
   </script>
+
 </body>
 </html>
