@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>English Boost App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9fafb;
+      color: #1f2937;
+    }
+    header {
+      background: #4f46e5;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    main {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    .form-section input, .form-section select, .form-section textarea, .form-section button {
+      display: block;
+      width: 100%;
+      margin: 0.5rem 0;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #cbd5e0;
+      font-size: 1rem;
+    }
+    button.save-btn {
+      background-color: #10b981;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    ul#cards {
+      list-style: none;
+      padding: 0;
+    }
+    ul#cards li {
+      background: white;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📘 English Boost - Meus Flashcards</h1>
+  </header>
+  <main>
+    <section class="form-section">
+      <input type="text" id="word" placeholder="Palavra em inglês">
+      <input type="text" id="translation" placeholder="Tradução">
+      <select id="category">
+        <option value="Viagem">Viagem</option>
+        <option value="Trabalho">Trabalho</option>
+        <option value="Negócios">Negócios</option>
+      </select>
+      <textarea id="example" placeholder="Exemplo de uso"></textarea>
+      <button class="save-btn" onclick="saveWord()">Salvar Palavra</button>
+    </section>
+    <section>
+      <h2>🧠 Meus Cards</h2>
+      <ul id="cards"></ul>
+    </section>
+  </main>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB3MJu07DvBEkeLXi-M316-Y9mIuXwU3fg",
+      authDomain: "english-boost-c6b41.firebaseapp.com",
+      projectId: "english-boost-c6b41",
+      storageBucket: "english-boost-c6b41.firebasestorage.app",
+      messagingSenderId: "985247197692",
+      appId: "1:985247197692:web:f0ccb015ee14bd12f02a79"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let user = null;
+
+    onAuthStateChanged(auth, (u) => {
+      if (u) {
+        user = u;
+        loadCards();
+      } else {
+        alert("Usuário não autenticado. Redirecionando...");
+        window.location.href = "index.html";
+      }
+    });
+
+    async function saveWord() {
+      const word = document.getElementById("word").value.trim();
+      const translation = document.getElementById("translation").value.trim();
+      const category = document.getElementById("category").value;
+      const example = document.getElementById("example").value.trim();
+
+      if (!word || !translation) return alert("Preencha todos os campos!");
+
+      await addDoc(collection(db, "users", user.uid, "flashcards"), {
+        word, translation, category, example
+      });
+
+      document.getElementById("word").value = "";
+      document.getElementById("translation").value = "";
+      document.getElementById("example").value = "";
+
+      loadCards();
+    }
+
+    async function loadCards() {
+      const cards = document.getElementById("cards");
+      cards.innerHTML = "";
+      const q = collection(db, "users", user.uid, "flashcards");
+      const snapshot = await getDocs(q);
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        const li = document.createElement("li");
+        li.innerHTML = `<strong>${data.word}</strong> - ${data.translation}<br><em>${data.category}</em><br><small>${data.example}</small>`;
+        cards.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>
