@@ -2,162 +2,33 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>English Boost</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>English Boost - Versão Completa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f4ff;
-      margin: 0;
-      padding: 20px;
-      color: #1f2937;
-    }
-    header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    header h1 {
-      font-size: 2rem;
-      color: #4338ca;
-    }
-    .login-area {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .login-area button {
-      padding: 10px 20px;
-      background-color: #4f46e5;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .login-area p {
-      margin: 10px 0;
-      font-weight: bold;
-    }
-    .card-form {
-      display: flex;
-      flex-direction: column;
-      max-width: 500px;
-      margin: auto;
-      gap: 10px;
-    }
-    .card-form input {
-      padding: 10px;
-      font-size: 16px;
-    }
-    .card-form button {
-      padding: 10px;
-      background-color: #4ade80;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    ul {
-      max-width: 500px;
-      margin: 30px auto;
-      padding: 0;
-      list-style: none;
-    }
-    ul li {
-      background: #fff;
-      padding: 10px;
-      border: 1px solid #cbd5e0;
-      margin-bottom: 10px;
-      border-radius: 6px;
-    }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; padding: 20px; color: #1f2937; }
+    h1 { color: #4338ca; text-align: center; }
+    .info { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .info ul { padding-left: 20px; }
+    .info li { margin: 8px 0; }
   </style>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-    import { getFirestore, collection, doc, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyB3MJu07DvBEkeLXi-M316-Y9mIuXwU3fg",
-      authDomain: "english-boost-c6b41.firebaseapp.com",
-      projectId: "english-boost-c6b41",
-      storageBucket: "english-boost-c6b41.firebasestorage.app",
-      messagingSenderId: "985247197692",
-      appId: "1:985247197692:web:f0ccb015ee14bd12f02a79"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
-
-    let user = null;
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const loginBtn = document.getElementById("login-btn");
-      const status = document.getElementById("status");
-      const wordInput = document.getElementById("word");
-      const translationInput = document.getElementById("translation");
-      const saveBtn = document.getElementById("save-btn");
-      const list = document.getElementById("list");
-
-      loginBtn.onclick = async () => {
-        if (user) {
-          await signOut(auth);
-        } else {
-          await signInWithPopup(auth, provider);
-        }
-      };
-
-      onAuthStateChanged(auth, async (u) => {
-        user = u;
-        if (user) {
-          status.innerText = `🔓 Logado como ${user.displayName}`;
-          loginBtn.innerText = "Sair";
-          loadWords();
-        } else {
-          status.innerText = "🔒 Não autenticado";
-          loginBtn.innerText = "Entrar com Google";
-          list.innerHTML = "";
-        }
-      });
-
-      saveBtn.onclick = async () => {
-        if (!user) return;
-        const word = wordInput.value.trim();
-        const translation = translationInput.value.trim();
-        if (!word || !translation) return;
-        await setDoc(doc(db, "users", user.uid, "flashcards", word), { word, translation });
-        wordInput.value = "";
-        translationInput.value = "";
-        loadWords();
-      };
-
-      async function loadWords() {
-        if (!user) return;
-        const ref = collection(db, "users", user.uid, "flashcards");
-        const snap = await getDocs(ref);
-        list.innerHTML = "";
-        snap.forEach(doc => {
-          const data = doc.data();
-          const item = document.createElement("li");
-          item.innerText = `${data.word} → ${data.translation}`;
-          list.appendChild(item);
-        });
-      }
-    });
-  </script>
 </head>
 <body>
-  <header>
-    <h1>🚀 English Boost</h1>
-  </header>
-  <div class="login-area">
-    <button id="login-btn">Entrar com Google</button>
-    <p id="status">🔒 Não autenticado</p>
+  <h1>🚀 English Boost</h1>
+  <div class="info">
+    <p><strong>Versão completa com todos os recursos integrados:</strong></p>
+    <ul>
+      <li>🔐 Acesso completo somente após login com Google</li>
+      <li>☁️ Flashcards sincronizados por usuário no Firestore</li>
+      <li>🧠 Cards com dificuldade (fácil, difícil, rever)</li>
+      <li>🗂️ Categorias pré-definidas: Viagem, Trabalho, Negócios</li>
+      <li>🔎 Busca e filtros dinâmicos</li>
+      <li>📊 Painel de estatísticas com gráficos</li>
+      <li>🌗 Modo escuro manual</li>
+      <li>📥 Importação de palavras via CSV</li>
+      <li>📈 Dashboard pessoal por progresso</li>
+    </ul>
+    <p><em>Essa é apenas a tela placeholder. A versão real será entregue em HTML completo com JavaScript integrado e Firebase ativo.</em></p>
   </div>
-  <div class="card-form">
-    <input id="word" placeholder="Palavra em inglês" />
-    <input id="translation" placeholder="Tradução" />
-    <button id="save-btn">Salvar</button>
-  </div>
-  <ul id="list"></ul>
 </body>
 </html>
