@@ -3,11 +3,10 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>English Boost com Firebase</title>
+  <title>English Boost - Login + Firebase</title>
   <script type="module">
-    // Importações do Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
     import { getFirestore, collection, doc, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -24,68 +23,70 @@
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
-    const loginBtn = document.getElementById('login-btn');
-    const statusText = document.getElementById('status');
-    const cardsContainer = document.getElementById('cards');
-
     let user = null;
 
-    loginBtn.onclick = async () => {
-      if (user) {
-        await signOut(auth);
-      } else {
-        await signInWithPopup(auth, provider);
-      }
-    };
+    document.addEventListener("DOMContentLoaded", () => {
+      const loginBtn = document.getElementById("login-btn");
+      const status = document.getElementById("status");
+      const wordInput = document.getElementById("word");
+      const translationInput = document.getElementById("translation");
+      const saveBtn = document.getElementById("save-btn");
+      const list = document.getElementById("list");
 
-    onAuthStateChanged(auth, async (u) => {
-      if (u) {
+      loginBtn.onclick = async () => {
+        if (user) {
+          await signOut(auth);
+        } else {
+          await signInWithPopup(auth, provider);
+        }
+      };
+
+      onAuthStateChanged(auth, async (u) => {
         user = u;
-        statusText.innerText = `🔓 Logado como ${u.displayName}`;
-        loginBtn.innerText = "Sair";
-        loadCards();
-      } else {
-        user = null;
-        statusText.innerText = "🔒 Não autenticado";
-        loginBtn.innerText = "Entrar com Google";
-        cardsContainer.innerHTML = "";
+        if (user) {
+          status.innerText = `🔓 Logado como ${user.displayName}`;
+          loginBtn.innerText = "Sair";
+          loadWords();
+        } else {
+          status.innerText = "🔒 Não autenticado";
+          loginBtn.innerText = "Entrar com Google";
+          list.innerHTML = "";
+        }
+      });
+
+      saveBtn.onclick = async () => {
+        if (!user) return;
+        const word = wordInput.value.trim();
+        const translation = translationInput.value.trim();
+        if (!word || !translation) return;
+        await setDoc(doc(db, "users", user.uid, "flashcards", word), { word, translation });
+        wordInput.value = "";
+        translationInput.value = "";
+        loadWords();
+      };
+
+      async function loadWords() {
+        if (!user) return;
+        const ref = collection(db, "users", user.uid, "flashcards");
+        const snap = await getDocs(ref);
+        list.innerHTML = "";
+        snap.forEach(doc => {
+          const data = doc.data();
+          const item = document.createElement("li");
+          item.innerText = `${data.word} → ${data.translation}`;
+          list.appendChild(item);
+        });
       }
     });
-
-    async function loadCards() {
-      const ref = collection(db, "users", user.uid, "flashcards");
-      const snap = await getDocs(ref);
-      cardsContainer.innerHTML = "";
-      snap.forEach(docSnap => {
-        const card = docSnap.data();
-        const div = document.createElement("div");
-        div.style = "padding:10px;margin:5px;border:1px solid #ccc";
-        div.innerHTML = `<b>${card.word}</b><br><i>${card.translation}</i>`;
-        cardsContainer.appendChild(div);
-      });
-    }
-
-    document.getElementById("save-btn").onclick = async () => {
-      const word = document.getElementById("word").value.trim();
-      const translation = document.getElementById("translation").value.trim();
-      if (!user || !word || !translation) return;
-      const ref = doc(db, "users", user.uid, "flashcards", word);
-      await setDoc(ref, { word, translation });
-      document.getElementById("word").value = "";
-      document.getElementById("translation").value = "";
-      loadCards();
-    };
   </script>
 </head>
 <body>
   <h1>🚀 English Boost</h1>
   <button id="login-btn">Entrar com Google</button>
   <p id="status">🔒 Não autenticado</p>
-  <div style="margin:20px 0;">
-    <input id="word" placeholder="Palavra" />
-    <input id="translation" placeholder="Tradução" />
-    <button id="save-btn">Salvar</button>
-  </div>
-  <div id="cards"></div>
+  <input id="word" placeholder="Palavra em inglês" />
+  <input id="translation" placeholder="Tradução" />
+  <button id="save-btn">Salvar</button>
+  <ul id="list"></ul>
 </body>
 </html>
