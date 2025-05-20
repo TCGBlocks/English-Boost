@@ -3,81 +3,61 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>English Boost App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f9fafb;
-      color: #1f2937;
-    }
-    header {
-      background: #4f46e5;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-    }
-    main {
-      max-width: 800px;
-      margin: 2rem auto;
-      padding: 1rem;
-    }
-    .form-section input, .form-section select, .form-section textarea, .form-section button {
-      display: block;
-      width: 100%;
-      margin: 0.5rem 0;
-      padding: 0.75rem;
-      border-radius: 8px;
-      border: 1px solid #cbd5e0;
-      font-size: 1rem;
-    }
-    button.save-btn {
-      background-color: #10b981;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    ul#cards {
-      list-style: none;
-      padding: 0;
-    }
-    ul#cards li {
-      background: white;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 8px;
-      border: 1px solid #e5e7eb;
-    }
-  </style>
+  <title>English Boost</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <header>
-    <h1>📘 English Boost - Meus Flashcards</h1>
+<body class="bg-gradient-to-tr from-blue-50 to-indigo-100 min-h-screen text-gray-800">
+  <header class="bg-indigo-600 text-white p-4 flex justify-between items-center shadow-md">
+    <h1 class="text-xl font-bold">🚀 English Boost</h1>
+    <button id="logoutBtn" class="bg-white text-indigo-600 px-4 py-1 rounded hover:bg-indigo-100">Sair</button>
   </header>
-  <main>
-    <section class="form-section">
-      <input type="text" id="word" placeholder="Palavra em inglês">
-      <input type="text" id="translation" placeholder="Tradução">
-      <select id="category">
+
+  <main class="max-w-4xl mx-auto p-4">
+    <section class="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <h2 class="text-lg font-semibold mb-4">Adicionar Palavra</h2>
+      <input id="word" class="w-full border p-2 rounded mb-2" placeholder="Palavra em inglês" />
+      <input id="translation" class="w-full border p-2 rounded mb-2" placeholder="Tradução" />
+      <select id="category" class="w-full border p-2 rounded mb-2">
         <option value="Viagem">Viagem</option>
         <option value="Trabalho">Trabalho</option>
         <option value="Negócios">Negócios</option>
       </select>
-      <textarea id="example" placeholder="Exemplo de uso"></textarea>
-      <button class="save-btn" onclick="saveWord()">Salvar Palavra</button>
+      <textarea id="example" class="w-full border p-2 rounded mb-4" placeholder="Exemplo de uso"></textarea>
+      <button onclick="saveWord()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Salvar</button>
+      <input type="file" id="csvFile" accept=".csv" class="mt-4 block" />
     </section>
-    <section>
-      <h2>🧠 Meus Cards</h2>
-      <ul id="cards"></ul>
+
+    <section class="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <h2 class="text-lg font-semibold mb-4">Filtros</h2>
+      <div class="flex flex-col sm:flex-row gap-4">
+        <select id="filterCategory" onchange="loadCards()" class="flex-1 border p-2 rounded">
+          <option value="">Todas as Categorias</option>
+          <option value="Viagem">Viagem</option>
+          <option value="Trabalho">Trabalho</option>
+          <option value="Negócios">Negócios</option>
+        </select>
+        <select id="filterDifficulty" onchange="loadCards()" class="flex-1 border p-2 rounded">
+          <option value="">Todas as Dificuldades</option>
+          <option value="Fácil">Fácil</option>
+          <option value="Rever">Rever</option>
+          <option value="Difícil">Difícil</option>
+        </select>
+        <input id="searchWord" oninput="loadCards()" placeholder="Buscar palavra" class="flex-1 border p-2 rounded" />
+      </div>
+    </section>
+
+    <section class="bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-lg font-semibold mb-4">🧠 Meus Cards</h2>
+      <ul id="cards" class="grid md:grid-cols-2 gap-4"></ul>
+      <button onclick="exportCards()" class="mt-4 bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">📤 Exportar CSV</button>
     </section>
   </main>
+
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js';
-    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js';
-    import { getFirestore, collection, addDoc, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, updateDoc, doc } from 'https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyB3MJu07DvBEkeLXi-M316-Y9mIuXwU3fg",
@@ -93,48 +73,109 @@
     const db = getFirestore(app);
 
     let user = null;
+    let allCards = [];
 
     onAuthStateChanged(auth, (u) => {
       if (u) {
         user = u;
         loadCards();
       } else {
-        alert("Usuário não autenticado. Redirecionando...");
-        window.location.href = "index.html";
+        location.href = "index.html";
       }
     });
 
+    document.getElementById("logoutBtn").onclick = () => {
+      signOut(auth).then(() => location.href = "index.html");
+    };
+
     async function saveWord() {
-      const word = document.getElementById("word").value.trim();
-      const translation = document.getElementById("translation").value.trim();
-      const category = document.getElementById("category").value;
-      const example = document.getElementById("example").value.trim();
-
-      if (!word || !translation) return alert("Preencha todos os campos!");
-
+      const word = wordInput.value.trim();
+      const translation = translationInput.value.trim();
+      const category = categoryInput.value;
+      const example = exampleInput.value.trim();
+      if (!word || !translation) return;
       await addDoc(collection(db, "users", user.uid, "flashcards"), {
-        word, translation, category, example
+        word, translation, category, example, difficulty: ""
       });
-
-      document.getElementById("word").value = "";
-      document.getElementById("translation").value = "";
-      document.getElementById("example").value = "";
-
+      wordInput.value = translationInput.value = exampleInput.value = "";
       loadCards();
     }
 
     async function loadCards() {
       const cards = document.getElementById("cards");
       cards.innerHTML = "";
-      const q = collection(db, "users", user.uid, "flashcards");
-      const snapshot = await getDocs(q);
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        const li = document.createElement("li");
-        li.innerHTML = `<strong>${data.word}</strong> - ${data.translation}<br><em>${data.category}</em><br><small>${data.example}</small>`;
-        cards.appendChild(li);
+      allCards = [];
+
+      const filter = document.getElementById("filterCategory").value;
+      const difficulty = document.getElementById("filterDifficulty").value;
+      const search = document.getElementById("searchWord").value.toLowerCase();
+
+      const snapshot = await getDocs(collection(db, "users", user.uid, "flashcards"));
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        data.id = docSnap.id;
+        allCards.push(data);
+        const match =
+          (!filter || data.category === filter) &&
+          (!difficulty || data.difficulty === difficulty) &&
+          (!search || data.word.toLowerCase().includes(search));
+        if (match) {
+          const li = document.createElement("li");
+          li.className = "border p-4 rounded shadow flex flex-col";
+          li.innerHTML = `
+            <div class="text-lg font-bold text-indigo-600">${data.word}</div>
+            <div>${data.translation}</div>
+            <small class="text-gray-500">${data.category} • ${data.difficulty || "Sem nota"}</small>
+            <em class="text-sm mt-1">${data.example}</em>
+            <div class="mt-2 flex gap-2 flex-wrap">
+              <button onclick="speak('${data.word}')" class="bg-blue-400 text-white px-2 rounded">🔊</button>
+              <button onclick="mark('${data.id}', 'Fácil')" class="bg-green-400 text-white px-2 rounded">Fácil</button>
+              <button onclick="mark('${data.id}', 'Rever')" class="bg-yellow-400 text-white px-2 rounded">Rever</button>
+              <button onclick="mark('${data.id}', 'Difícil')" class="bg-red-400 text-white px-2 rounded">Difícil</button>
+            </div>`;
+          cards.appendChild(li);
+        }
       });
     }
+
+    async function mark(id, level) {
+      const ref = doc(db, "users", user.uid, "flashcards", id);
+      await updateDoc(ref, { difficulty: level });
+      loadCards();
+    }
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      speechSynthesis.speak(utterance);
+    }
+
+    function exportCards() {
+      const headers = ["word", "translation", "category", "example"];
+      const rows = [headers.join(",")];
+      allCards.forEach(card => {
+        rows.push([card.word, card.translation, card.category, card.example].map(v => `"${v}"`).join(","));
+      });
+      const blob = new Blob([rows.join("\n")], { type: "text/csv" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "meus_flashcards.csv";
+      link.click();
+    }
+
+    document.getElementById("csvFile").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      const text = await file.text();
+      const lines = text.trim().split("\n");
+      const headers = lines[0].split(",");
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(",");
+        const card = {};
+        headers.forEach((key, idx) => card[key.trim()] = values[idx].replaceAll('"', '').trim());
+        await addDoc(collection(db, "users", user.uid, "flashcards"), { ...card, difficulty: "" });
+      }
+      loadCards();
+    });
   </script>
 </body>
 </html>
