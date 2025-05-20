@@ -1,9 +1,74 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>English Boost - Login + Firebase</title>
+  <meta charset="UTF-8">
+  <title>English Boost</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4ff;
+      margin: 0;
+      padding: 20px;
+      color: #1f2937;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    header h1 {
+      font-size: 2rem;
+      color: #4338ca;
+    }
+    .login-area {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .login-area button {
+      padding: 10px 20px;
+      background-color: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .login-area p {
+      margin: 10px 0;
+      font-weight: bold;
+    }
+    .card-form {
+      display: flex;
+      flex-direction: column;
+      max-width: 500px;
+      margin: auto;
+      gap: 10px;
+    }
+    .card-form input {
+      padding: 10px;
+      font-size: 16px;
+    }
+    .card-form button {
+      padding: 10px;
+      background-color: #4ade80;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    ul {
+      max-width: 500px;
+      margin: 30px auto;
+      padding: 0;
+      list-style: none;
+    }
+    ul li {
+      background: #fff;
+      padding: 10px;
+      border: 1px solid #cbd5e0;
+      margin-bottom: 10px;
+      border-radius: 6px;
+    }
+  </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
@@ -81,12 +146,18 @@
   </script>
 </head>
 <body>
-  <h1>🚀 English Boost</h1>
-  <button id="login-btn">Entrar com Google</button>
-  <p id="status">🔒 Não autenticado</p>
-  <input id="word" placeholder="Palavra em inglês" />
-  <input id="translation" placeholder="Tradução" />
-  <button id="save-btn">Salvar</button>
+  <header>
+    <h1>🚀 English Boost</h1>
+  </header>
+  <div class="login-area">
+    <button id="login-btn">Entrar com Google</button>
+    <p id="status">🔒 Não autenticado</p>
+  </div>
+  <div class="card-form">
+    <input id="word" placeholder="Palavra em inglês" />
+    <input id="translation" placeholder="Tradução" />
+    <button id="save-btn">Salvar</button>
+  </div>
   <ul id="list"></ul>
 </body>
 </html>
