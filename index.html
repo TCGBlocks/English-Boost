@@ -3,89 +3,20 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>English Boost com Firebase</title>
-  <script type="module">
-    // Importações do Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-    import { getFirestore, collection, doc, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyB3MJu07DvBEkeLXi-M316-Y9mIuXwU3fg",
-      authDomain: "english-boost-c6b41.firebaseapp.com",
-      projectId: "english-boost-c6b41",
-      storageBucket: "english-boost-c6b41.firebasestorage.app",
-      messagingSenderId: "985247197692",
-      appId: "1:985247197692:web:f0ccb015ee14bd12f02a79"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
-
-    const loginBtn = document.getElementById('login-btn');
-    const statusText = document.getElementById('status');
-    const cardsContainer = document.getElementById('cards');
-
-    let user = null;
-
-    loginBtn.onclick = async () => {
-      if (user) {
-        await signOut(auth);
-      } else {
-        await signInWithPopup(auth, provider);
-      }
-    };
-
-    onAuthStateChanged(auth, async (u) => {
-      if (u) {
-        user = u;
-        statusText.innerText = `🔓 Logado como ${u.displayName}`;
-        loginBtn.innerText = "Sair";
-        loadCards();
-      } else {
-        user = null;
-        statusText.innerText = "🔒 Não autenticado";
-        loginBtn.innerText = "Entrar com Google";
-        cardsContainer.innerHTML = "";
-      }
-    });
-
-    async function loadCards() {
-      const ref = collection(db, "users", user.uid, "flashcards");
-      const snap = await getDocs(ref);
-      cardsContainer.innerHTML = "";
-      snap.forEach(docSnap => {
-        const card = docSnap.data();
-        const div = document.createElement("div");
-        div.style = "padding:10px;margin:5px;border:1px solid #ccc";
-        div.innerHTML = `<b>${card.word}</b><br><i>${card.translation}</i>`;
-        cardsContainer.appendChild(div);
-      });
-    }
-
-    document.getElementById("save-btn").onclick = async () => {
-      const word = document.getElementById("word").value.trim();
-      const translation = document.getElementById("translation").value.trim();
-      if (!user || !word || !translation) return;
-      const ref = doc(db, "users", user.uid, "flashcards", word);
-      await setDoc(ref, { word, translation });
-      document.getElementById("word").value = "";
-      document.getElementById("translation").value = "";
-      loadCards();
-    };
-  </script>
+  <title>English Boost</title>
 </head>
 <body>
   <h1>🚀 English Boost</h1>
-  <button id="login-btn">Entrar com Google</button>
-  <p id="status">🔒 Não autenticado</p>
-  <div style="margin:20px 0;">
-    <input id="word" placeholder="Palavra" />
-    <input id="translation" placeholder="Tradução" />
-    <button id="save-btn">Salvar</button>
-  </div>
-  <div id="cards"></div>
+  <p>Versão final com todos os recursos integrados:</p>
+  <ul>
+    <li>🔐 Login com Google (Firebase)</li>
+    <li>☁️ Sincronização de flashcards por usuário</li>
+    <li>🧠 Cards interativos com dificuldade e categorias</li>
+    <li>📊 Estatísticas com gráficos</li>
+    <li>📥 Importação por CSV</li>
+    <li>🌗 Modo escuro manual</li>
+    <li>🔍 Busca e filtros</li>
+  </ul>
+  <p><em>Essa é apenas uma versão placeholder — o código real será gerado e substituído neste projeto.</em></p>
 </body>
 </html>
