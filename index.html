@@ -1,16 +1,24 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>English Boost</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="style.css" rel="stylesheet" />
   </head>
-  <body class="bg-gradient-to-tr from-purple-200 to-pink-100 min-h-screen flex items-center justify-center">
-    <div class="bg-white bg-opacity-60 rounded-3xl shadow-xl p-10 text-center max-w-md w-full">
-      <img src="butterfly.png" alt="Borboleta" class="mx-auto w-28 mb-6" />
-      <h1 class="text-3xl font-bold text-purple-800 mb-6">English Boost</h1>
-      <button class="bg-purple-700 text-white px-6 py-2 rounded-lg hover:bg-purple-800 transition">Entrar com Google</button>
+  <body>
+    <div class="container">
+      <div class="card">
+        <img src="butterfly.png" alt="Butterfly" class="butterfly-image" />
+        <h1>English Boost</h1>
+        <button onclick="login()">Login</button>
+      </div>
     </div>
+    <script>
+      function login() {
+        window.location.href = 'app.html';
+      }
+    </script>
   </body>
 </html>
