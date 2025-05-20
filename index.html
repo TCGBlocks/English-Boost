@@ -8,50 +8,46 @@
   <style>
     * { box-sizing: border-box; }
     body {
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      font-family: 'Helvetica Neue', sans-serif;
-      background: linear-gradient(135deg, #e0e7ff, #f9fafb);
+      padding: 0;
+      background: #f3f4f6;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       height: 100vh;
-      color: #1f2937;
     }
     .container {
-      text-align: center;
       background: white;
-      padding: 40px;
-      border-radius: 16px;
+      padding: 2rem;
+      border-radius: 12px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+      text-align: center;
       max-width: 400px;
       width: 100%;
     }
     h1 {
-      font-size: 2rem;
-      margin-bottom: 10px;
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
       color: #4338ca;
     }
-    p {
-      font-size: 1rem;
-      margin: 20px 0;
-    }
-    .features {
+    ul {
       text-align: left;
-      margin: 20px 0;
+      margin-top: 1rem;
+    }
+    li {
+      margin-bottom: 0.5rem;
       font-size: 0.95rem;
     }
-    .features li {
-      margin-bottom: 8px;
-    }
     button {
-      padding: 12px 24px;
+      margin-top: 1.5rem;
       background-color: #4f46e5;
       color: white;
+      padding: 0.8rem 1.5rem;
       border: none;
       border-radius: 8px;
       font-size: 1rem;
       cursor: pointer;
-      transition: 0.3s ease;
     }
     button:hover {
       background-color: #4338ca;
@@ -61,41 +57,42 @@
 <body>
   <div class="container">
     <h1>🚀 English Boost</h1>
-    <p>Aprenda inglês de forma inteligente e divertida</p>
-    <ul class="features">
+    <p>Aprenda inglês de forma inteligente e divertida:</p>
+    <ul>
       <li>✔ Cards com dificuldade (SRS leve)</li>
-      <li>✔ Categorias: Viagem, Trabalho, Negócios</li>
-      <li>✔ Estatísticas de progresso com gráficos</li>
-      <li>✔ Importação de palavras via CSV</li>
-      <li>✔ 100% gratuito e sincronizado na nuvem</li>
+      <li>✔ Categorias temáticas</li>
+      <li>✔ Estatísticas visuais</li>
+      <li>✔ Importação CSV</li>
+      <li>✔ 100% gratuito na nuvem</li>
     </ul>
     <button onclick="login()">Entrar com Google</button>
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-      import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyB3MJu07DvBEkeLXi-M316-Y9mIuXwU3fg",
-        authDomain: "english-boost-c6b41.firebaseapp.com",
-        projectId: "english-boost-c6b41",
-        storageBucket: "english-boost-c6b41.firebasestorage.app",
-        messagingSenderId: "985247197692",
-        appId: "1:985247197692:web:f0ccb015ee14bd12f02a79"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const provider = new GoogleAuthProvider();
-
-      window.login = async () => {
-        try {
-          await signInWithPopup(auth, provider);
-          window.location.href = "app.html"; // redireciona para a aplicação real
-        } catch (err) {
-          alert("Erro no login.");
-        }
-      };
-    </script>
   </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB3MJu07DvBEkeLXi-M316-Y9mIuXwU3fg",
+      authDomain: "english-boost-c6b41.firebaseapp.com",
+      projectId: "english-boost-c6b41",
+      storageBucket: "english-boost-c6b41.firebasestorage.app",
+      messagingSenderId: "985247197692",
+      appId: "1:985247197692:web:f0ccb015ee14bd12f02a79"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    window.login = async () => {
+      try {
+        await signInWithPopup(auth, provider);
+        window.location.href = "app.html";
+      } catch (error) {
+        alert("Erro no login: " + error.message);
+      }
+    };
+  </script>
 </body>
 </html>
